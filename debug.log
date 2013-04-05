@@ -1,0 +1,80 @@
+[0405/115324:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115324:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115324:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115324:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115324:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115324:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115454:INFO:webkit_glue.cc(257)] WebFrame LEAKED 1 TIMES
+[0405/115454:INFO:webkit_glue.cc(257)] WebFrame LEAKED 2 TIMES
+[0405/115454:FATAL:v8_impl.cc(76)] Check failed: context_map_.empty(). 
+Backtrace:
+	cef_browser_host_create_browser [0x0FFA1B61+836706]
+	cef_browser_host_create_browser [0x0FF8DF9F+755872]
+	cef_trace_event_async_end [0x10068B6F+16271]
+	cef_trace_event_async_end [0x10068A46+15974]
+	cef_trace_event_async_end [0x10068A00+15904]
+	cef_trace_event_async_end [0x10068924+15684]
+	cef_string_multimap_free [0x100E30E3+377219]
+	cef_time_delta [0x1015AD7A+441658]
+	cef_time_delta [0x11D421ED+29700525]
+	cef_time_delta [0x11D413C6+29696902]
+	cef_time_delta [0x11BD644A+28210186]
+	cef_time_delta [0x11BD5DAD+28208493]
+	cef_time_delta [0x11D4B56F+29738287]
+	cef_time_delta [0x11D4B606+29738438]
+	cef_time_delta [0x11D4064F+29693455]
+	cef_time_delta [0x11592304+21639876]
+	cef_time_delta [0x11593136+21643510]
+	cef_time_delta [0x11591B68+21637928]
+	cef_browser_host_create_browser [0x1004C2A9+1534890]
+	cef_browser_host_create_browser [0x0FED9FD1+18642]
+	CefExecuteProcess [0x010EA89E+158] (c:\users\laurent\documents\github\cef_file_api\libcef_dll\wrapper\libcef_dll_wrapper.cc:128)
+	wWinMain [0x01094EFA+138] (c:\users\laurent\documents\github\cef_file_api\cefclient\cefclient_win.cpp:76)
+	__tmainCRTStartup [0x01131102+322] (f:\dd\vctools\crt_bld\self_x86\crt\src\crt0.c:275)
+	wWinMainCRTStartup [0x01130FAF+15] (f:\dd\vctools\crt_bld\self_x86\crt\src\crt0.c:189)
+	BaseThreadInitThunk [0x761D33AA+18]
+	RtlInitializeExceptionChain [0x779B9EF2+99]
+	RtlInitializeExceptionChain [0x779B9EC5+54]
+
+[0405/115515:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115515:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115515:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115515:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115515:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115515:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115526:INFO:webkit_glue.cc(257)] WebFrame LEAKED 1 TIMES
+[0405/115526:INFO:webkit_glue.cc(257)] WebFrame LEAKED 2 TIMES
+[0405/115526:FATAL:v8_impl.cc(76)] Check failed: context_map_.empty(). 
+Backtrace:
+	cef_browser_host_create_browser [0x0F4A1B61+836706]
+	cef_browser_host_create_browser [0x0F48DF9F+755872]
+	cef_trace_event_async_end [0x0F568B6F+16271]
+	cef_trace_event_async_end [0x0F568A46+15974]
+	cef_trace_event_async_end [0x0F568A00+15904]
+	cef_trace_event_async_end [0x0F568924+15684]
+	cef_string_multimap_free [0x0F5E30E3+377219]
+	cef_time_delta [0x0F65AD7A+441658]
+	cef_time_delta [0x112421ED+29700525]
+	cef_time_delta [0x112413C6+29696902]
+	cef_time_delta [0x110D644A+28210186]
+	cef_time_delta [0x110D5DAD+28208493]
+	cef_time_delta [0x1124B56F+29738287]
+	cef_time_delta [0x1124B606+29738438]
+	cef_time_delta [0x1124064F+29693455]
+	cef_time_delta [0x10A92304+21639876]
+	cef_time_delta [0x10A93136+21643510]
+	cef_time_delta [0x10A91B68+21637928]
+	cef_browser_host_create_browser [0x0F54C2A9+1534890]
+	cef_browser_host_create_browser [0x0F3D9FD1+18642]
+	CefExecuteProcess [0x010DA89E+158] (c:\users\laurent\documents\github\cef_file_api\libcef_dll\wrapper\libcef_dll_wrapper.cc:128)
+	wWinMain [0x01084EFA+138] (c:\users\laurent\documents\github\cef_file_api\cefclient\cefclient_win.cpp:76)
+	__tmainCRTStartup [0x01121102+322] (f:\dd\vctools\crt_bld\self_x86\crt\src\crt0.c:275)
+	wWinMainCRTStartup [0x01120FAF+15] (f:\dd\vctools\crt_bld\self_x86\crt\src\crt0.c:189)
+	BaseThreadInitThunk [0x761D33AA+18]
+	RtlInitializeExceptionChain [0x779B9EF2+99]
+	RtlInitializeExceptionChain [0x779B9EC5+54]
+
+[0405/115750:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115750:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/115755:ERROR:ipc_channel_win.cc(132)] pipe error: 109
+[0405/115830:ERROR:ipc_channel_win.cc(132)] pipe error: 109

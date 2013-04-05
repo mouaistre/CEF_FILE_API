@@ -14,6 +14,7 @@
 #include "include/cef_frame.h"
 #include "include/cef_runnable.h"
 #include "cefclient/binding_test.h"
+#include "cefclient/filesystem_test.h"
 #include "cefclient/cefclient_osr_widget_win.h"
 #include "cefclient/client_handler.h"
 #include "cefclient/client_switches.h"
@@ -411,6 +412,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
       case ID_TESTS_BINDING:  // Test JavaScript binding
         if (browser.get())
           binding_test::RunTest(browser);
+        return 0;
+	  case ID_TESTS_FILE_SYSTEM://Test file system interaction
+		if (browser.get())
+          filesystem_test::RunTest(browser);
         return 0;
       case ID_TESTS_PERFORMANCE:  // Run performance tests
         if (browser.get())

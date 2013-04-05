@@ -52,6 +52,7 @@ CefRefPtr<CefStreamReader> GetBinaryResourceReader(const char* resource_name) {
     {"performance.html", IDS_PERFORMANCE},
     {"transparency.html", IDS_TRANSPARENCY},
     {"xmlhttprequest.html", IDS_XMLHTTPREQUEST},
+	{"filesystem.html", IDS_FILESYSTEM},
   };
 
   for (int i = 0; i < sizeof(resource_map)/sizeof(_resource_map); ++i) {

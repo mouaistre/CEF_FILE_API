@@ -37,6 +37,7 @@ IDS_LOGOBALL BINARY "res\\logoball.png"
 IDS_PERFORMANCE BINARY "res\\performance.html"
 IDS_TRANSPARENCY BINARY "res\\transparency.html"
 IDS_XMLHTTPREQUEST BINARY "res\\xmlhttprequest.html"
+IDS_FILESYSTEM BINARY "res\\filesystem.html"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -71,6 +72,7 @@ BEGIN
         MENUITEM "Request",                     ID_TESTS_REQUEST
         MENUITEM "Scheme Handler",              ID_TESTS_SCHEME_HANDLER
         MENUITEM "JavaScript Binding",          ID_TESTS_BINDING
+		MENUITEM "File System Binding",		    ID_TESTS_FILE_SYSTEM
         MENUITEM "Performance Tests",           ID_TESTS_PERFORMANCE
         MENUITEM "Dialogs",                     ID_TESTS_DIALOGS
         MENUITEM "Plugin Info",                 ID_TESTS_PLUGIN_INFO

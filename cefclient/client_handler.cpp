@@ -15,6 +15,7 @@
 #include "include/cef_trace.h"
 #include "include/wrapper/cef_stream_resource_handler.h"
 #include "cefclient/binding_test.h"
+#include "cefclient/filesystem_test.h"
 #include "cefclient/cefclient.h"
 #include "cefclient/client_renderer.h"
 #include "cefclient/client_switches.h"
@@ -657,6 +658,8 @@ void ClientHandler::CreateProcessMessageDelegates(
   binding_test::CreateProcessMessageDelegates(delegates);
   // Create the dialog test delegates.
   dialog_test::CreateProcessMessageDelegates(delegates);
+  //Create the file systems delegate
+  filesystem_test::CreateProcessMessageDelegates(delegates);
 }
 
 // static
@@ -666,6 +669,9 @@ void ClientHandler::CreateRequestDelegates(RequestDelegateSet& delegates) {
 
   // Create the performance test delegates.
   performance_test::CreateRequestDelegates(delegates);
+
+  //Create the file systems delegate
+  filesystem_test::CreateRequestDelegates(delegates);
 }
 
 void ClientHandler::BuildTestMenu(CefRefPtr<CefMenuModel> model) {

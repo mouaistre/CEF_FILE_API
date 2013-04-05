@@ -267,6 +267,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="cefclient.gyp" />
+    <None Include="cefclient\res\filesystem.html" />
     <None Include="cefclient\res\small.ico" />
     <None Include="cefclient\res\cefclient.ico" />
     <None Include="cefclient\res\xmlhttprequest.html" />
@@ -280,6 +281,7 @@
     <None Include="cefclient\res\dialogs.html" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cefclient\filesystem_test.h" />
     <ClInclude Include="include\cef_trace.h" />
     <ClInclude Include="include\cef_download_handler.h" />
     <ClInclude Include="include\cef_request.h" />
@@ -369,6 +371,7 @@
     <ClInclude Include="cefclient\performance_test_setup.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cefclient\filesystem_test.cpp" />
     <ClCompile Include="cefclient\performance_test_tests.cpp" />
     <ClCompile Include="cefclient\cefclient_win.cpp" />
     <ClCompile Include="cefclient\cefclient_osr_widget_win.cpp" />
