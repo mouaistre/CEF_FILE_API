@@ -519,3 +519,87 @@ Backtrace:
 [0405/172332:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
 [0405/172342:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
 [0405/172349:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/172536:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/172825:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/172831:INFO:webkit_glue.cc(257)] WebFrame LEAKED 2 TIMES
+[0405/172831:FATAL:v8_impl.cc(76)] Check failed: context_map_.empty(). 
+Backtrace:
+	cef_browser_host_create_browser [0x0F4B1B61+836706]
+	cef_browser_host_create_browser [0x0F49DF9F+755872]
+	cef_trace_event_async_end [0x0F578B6F+16271]
+	cef_trace_event_async_end [0x0F578A46+15974]
+	cef_trace_event_async_end [0x0F578A00+15904]
+	cef_trace_event_async_end [0x0F578924+15684]
+	cef_string_multimap_free [0x0F5F30E3+377219]
+	cef_time_delta [0x0F66AD7A+441658]
+	cef_time_delta [0x112521ED+29700525]
+	cef_time_delta [0x112513C6+29696902]
+	cef_time_delta [0x110E644A+28210186]
+	cef_time_delta [0x110E5DAD+28208493]
+	cef_time_delta [0x1125B56F+29738287]
+	cef_time_delta [0x1125B606+29738438]
+	cef_time_delta [0x1125B596+29738326]
+	cef_time_delta [0x10AB5C79+21720121]
+	cef_time_delta [0x10AAE97B+21690683]
+	cef_time_delta [0x1146DEF2+31911602]
+	cef_browser_host_create_browser [0x0F4B3C3F+845120]
+	BaseThreadInitThunk [0x761D33AA+18]
+	RtlInitializeExceptionChain [0x779B9EF2+99]
+	RtlInitializeExceptionChain [0x779B9EC5+54]
+
+[0405/172845:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172845:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172845:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172845:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172845:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172845:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172847:ERROR:ipc_channel_win.cc(132)] pipe error: 109
+[0405/172854:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/172857:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172857:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172857:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172857:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172857:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172857:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172903:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/172910:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/172915:INFO:webkit_glue.cc(257)] WebFrame LEAKED 2 TIMES
+[0405/172915:FATAL:v8_impl.cc(76)] Check failed: context_map_.empty(). 
+Backtrace:
+	cef_browser_host_create_browser [0x0FC51B61+836706]
+	cef_browser_host_create_browser [0x0FC3DF9F+755872]
+	cef_trace_event_async_end [0x0FD18B6F+16271]
+	cef_trace_event_async_end [0x0FD18A46+15974]
+	cef_trace_event_async_end [0x0FD18A00+15904]
+	cef_trace_event_async_end [0x0FD18924+15684]
+	cef_string_multimap_free [0x0FD930E3+377219]
+	cef_time_delta [0x0FE0AD7A+441658]
+	cef_time_delta [0x119F21ED+29700525]
+	cef_time_delta [0x119F13C6+29696902]
+	cef_time_delta [0x1188644A+28210186]
+	cef_time_delta [0x11885DAD+28208493]
+	cef_time_delta [0x119FB56F+29738287]
+	cef_time_delta [0x119FB606+29738438]
+	cef_time_delta [0x119FB596+29738326]
+	cef_time_delta [0x11255C79+21720121]
+	cef_time_delta [0x1124E97B+21690683]
+	cef_time_delta [0x11C0DEF2+31911602]
+	cef_browser_host_create_browser [0x0FC53C3F+845120]
+	BaseThreadInitThunk [0x761D33AA+18]
+	RtlInitializeExceptionChain [0x779B9EF2+99]
+	RtlInitializeExceptionChain [0x779B9EC5+54]
+
+[0405/172950:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172950:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172950:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172950:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172950:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172950:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172952:ERROR:ipc_channel_win.cc(401)] pipe error: 232
+[0405/172958:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172958:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172958:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172958:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172959:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/172959:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/173000:ERROR:ipc_channel_win.cc(132)] pipe error: 109

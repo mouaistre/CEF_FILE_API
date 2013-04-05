@@ -85,8 +85,9 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   AppInitCommandLine(0, NULL);
 
   CefSettings settings;
+#ifdef _DEBUG 
   settings.single_process=true;//for testing
-
+#endif
   // Populate the settings based on command line arguments.
   AppGetSettings(settings);
 
