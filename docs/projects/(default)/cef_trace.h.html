@@ -1,0 +1,136 @@
+<HTML>
+<HEAD>
+<TITLE>
+cef_trace.h
+</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+<font color="green">// Copyright (c) 2012 Marshall A. Greenblatt. Portons copyright (c) 2012</font>
+<font color="green">// Google Inc. All rights reserved.</font>
+<font color="green">//</font>
+<font color="green">// Redistribution and use in source and binary forms, with or without</font>
+<font color="green">// modification, are permitted provided that the following conditions are</font>
+<font color="green">// met:</font>
+<font color="green">//</font>
+<font color="green">//    * Redistributions of source code must retain the above copyright</font>
+<font color="green">// notice, this list of conditions and the following disclaimer.</font>
+<font color="green">//    * Redistributions in binary form must reproduce the above</font>
+<font color="green">// copyright notice, this list of conditions and the following disclaimer</font>
+<font color="green">// in the documentation and/or other materials provided with the</font>
+<font color="green">// distribution.</font>
+<font color="green">//    * Neither the name of Google Inc. nor the name Chromium Embedded</font>
+<font color="green">// Framework nor the names of its contributors may be used to endorse</font>
+<font color="green">// or promote products derived from this software without specific prior</font>
+<font color="green">// written permission.</font>
+<font color="green">//</font>
+<font color="green">// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</font>
+<font color="green">// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</font>
+<font color="green">// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</font>
+<font color="green">// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</font>
+<font color="green">// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</font>
+<font color="green">// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</font>
+<font color="green">// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</font>
+<font color="green">// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</font>
+<font color="green">// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</font>
+<font color="green">// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</font>
+<font color="green">// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</font>
+<font color="green">//</font>
+<font color="green">// ---------------------------------------------------------------------------</font>
+<font color="green">//</font>
+<font color="green">// The contents of this file must follow a specific format in order to</font>
+<font color="green">// support the CEF translator tool. See the translator.README.txt file in the</font>
+<font color="green">// tools directory for more information.</font>
+<font color="green">//</font>
+
+<font color="green">// See cef_trace_event.h for trace macros and additonal documentation.</font>
+
+<font color="blue">#ifndef</font> CEF_INCLUDE_CEF_TRACE_H_
+<font color="blue">#define</font> CEF_INCLUDE_CEF_TRACE_H_
+<font color="blue">#pragma</font> once
+
+<font color="blue">#include</font> <font color="maroon">"include/cef_base.h"</font>
+
+<font color="green">///</font>
+<font color="green">// Implement this interface to receive trace notifications. The methods of this</font>
+<font color="green">// class will be called on the browser process UI thread.</font>
+<font color="green">///</font>
+<font color="green">/*--cef(source=client)--*/</font>
+<font color="blue">class</font> CefTraceClient <font color="black">:</font> <font color="blue">public</font> virtual CefBase <font color="black">{</font>
+ <font color="blue">public</font><font color="black">:</font>
+  <font color="green">///</font>
+  <font color="green">// Called 0 or more times between CefBeginTracing and OnEndTracingComplete</font>
+  <font color="green">// with a UTF8 JSON |fragment| of the specified |fragment_size|. Do not keep</font>
+  <font color="green">// a reference to |fragment|.</font>
+  <font color="green">///</font>
+  <font color="green">/*--cef()--*/</font>
+  virtual <font color="blue">void</font> OnTraceDataCollected<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> fragment,
+                                    size_t fragment_size<font color="black">)</font> <font color="black">{</font><font color="black">}</font>
+
+  <font color="green">///</font>
+  <font color="green">// Called in response to CefGetTraceBufferPercentFullAsync.</font>
+  <font color="green">///</font>
+  <font color="green">/*--cef()--*/</font>
+  virtual <font color="blue">void</font> OnTraceBufferPercentFullReply<font color="black">(</font><font color="blue">float</font> percent_full<font color="black">)</font> <font color="black">{</font><font color="black">}</font>
+
+  <font color="green">///</font>
+  <font color="green">// Called after all processes have sent their trace data.</font>
+  <font color="green">///</font>
+  <font color="green">/*--cef()--*/</font>
+  virtual <font color="blue">void</font> OnEndTracingComplete<font color="black">(</font><font color="black">)</font> <font color="black">{</font><font color="black">}</font>
+<font color="black">}</font>;
+
+
+<font color="green">///</font>
+<font color="green">// Start tracing events on all processes. Tracing begins immediately locally,</font>
+<font color="green">// and asynchronously on child processes as soon as they receive the</font>
+<font color="green">// BeginTracing request.</font>
+<font color="green">//</font>
+<font color="green">// If CefBeginTracing was called previously, or if a CefEndTracingAsync call is</font>
+<font color="green">// pending, CefBeginTracing will fail and return false.</font>
+<font color="green">//</font>
+<font color="green">// |categories| is a comma-delimited list of category wildcards. A category can</font>
+<font color="green">// have an optional '-' prefix to make it an excluded category. Having both</font>
+<font color="green">// included and excluded categories in the same list is not supported.</font>
+<font color="green">//</font>
+<font color="green">// Example: "test_MyTest*"</font>
+<font color="green">// Example: "test_MyTest*,test_OtherStuff"</font>
+<font color="green">// Example: "-excluded_category1,-excluded_category2"</font>
+<font color="green">//</font>
+<font color="green">// This function must be called on the browser process UI thread.</font>
+<font color="green">///</font>
+<font color="green">/*--cef(optional_param=client,optional_param=categories)--*/</font>
+<font color="blue">bool</font> CefBeginTracing<font color="black">(</font>CefRefPtr<font color="black">&#60;</font>CefTraceClient<font color="black">&#62;</font> client,
+                     <font color="blue">const</font> CefString<font color="black">&</font> categories<font color="black">)</font>;
+
+<font color="green">///</font>
+<font color="green">// Get the maximum trace buffer percent full state across all processes.</font>
+<font color="green">//</font>
+<font color="green">// CefTraceClient::OnTraceBufferPercentFullReply will be called asynchronously</font>
+<font color="green">// after the value is determibed. When any child process reaches 100% full</font>
+<font color="green">// tracing will end automatically and CefTraceClient::OnEndTracingComplete</font>
+<font color="green">// will be called. This function fails and returns false if trace is ending or</font>
+<font color="green">// disabled, no CefTraceClient was passed to CefBeginTracing, or if a previous</font>
+<font color="green">// call to CefGetTraceBufferPercentFullAsync is pending.</font>
+<font color="green">//</font>
+<font color="green">// This function must be called on the browser process UI thread.</font>
+<font color="green">///</font>
+<font color="green">/*--cef()--*/</font>
+<font color="blue">bool</font> CefGetTraceBufferPercentFullAsync<font color="black">(</font><font color="black">)</font>;
+
+<font color="green">///</font>
+<font color="green">// Stop tracing events on all processes.</font>
+<font color="green">//</font>
+<font color="green">// This function will fail and return false if a previous call to</font>
+<font color="green">// CefEndTracingAsync is already pending or if CefBeginTracing was not called.</font>
+<font color="green">//</font>
+<font color="green">// This function must be called on the browser process UI thread.</font>
+<font color="green">///</font>
+<font color="green">/*--cef()--*/</font>
+<font color="blue">bool</font> CefEndTracingAsync<font color="black">(</font><font color="black">)</font>;
+
+<font color="blue">#endif</font>  <font color="green">// CEF_INCLUDE_CEF_TRACE_H_</font>
+
+</PRE>
+</BODY>
+</HTML>

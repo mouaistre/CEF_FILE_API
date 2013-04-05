@@ -1,0 +1,451 @@
+<HTML>
+<HEAD>
+<TITLE>
+cef_trace_event.h
+</TITLE>
+</HEAD>
+<BODY>
+<PRE>
+<font color="green">// Copyright (c) 2012 Marshall A. Greenblatt. Portions copyright (c) 2012</font>
+<font color="green">// Google Inc. All rights reserved.</font>
+<font color="green">//</font>
+<font color="green">// Redistribution and use in source and binary forms, with or without</font>
+<font color="green">// modification, are permitted provided that the following conditions are</font>
+<font color="green">// met:</font>
+<font color="green">//</font>
+<font color="green">//    * Redistributions of source code must retain the above copyright</font>
+<font color="green">// notice, this list of conditions and the following disclaimer.</font>
+<font color="green">//    * Redistributions in binary form must reproduce the above</font>
+<font color="green">// copyright notice, this list of conditions and the following disclaimer</font>
+<font color="green">// in the documentation and/or other materials provided with the</font>
+<font color="green">// distribution.</font>
+<font color="green">//    * Neither the name of Google Inc. nor the name Chromium Embedded</font>
+<font color="green">// Framework nor the names of its contributors may be used to endorse</font>
+<font color="green">// or promote products derived from this software without specific prior</font>
+<font color="green">// written permission.</font>
+<font color="green">//</font>
+<font color="green">// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</font>
+<font color="green">// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</font>
+<font color="green">// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</font>
+<font color="green">// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</font>
+<font color="green">// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</font>
+<font color="green">// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</font>
+<font color="green">// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</font>
+<font color="green">// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</font>
+<font color="green">// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</font>
+<font color="green">// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</font>
+<font color="green">// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</font>
+
+<font color="green">///</font>
+<font color="green">// Trace events are for tracking application performance and resource usage.</font>
+<font color="green">// Macros are provided to track:</font>
+<font color="green">//    Begin and end of function calls</font>
+<font color="green">//    Counters</font>
+<font color="green">//</font>
+<font color="green">// Events are issued against categories. Whereas LOG's categories are statically</font>
+<font color="green">// defined, TRACE categories are created implicitly with a string. For example:</font>
+<font color="green">//   CEF_TRACE_EVENT_INSTANT0("MY_SUBSYSTEM", "SomeImportantEvent")</font>
+<font color="green">//</font>
+<font color="green">// Events can be INSTANT, or can be pairs of BEGIN and END in the same scope:</font>
+<font color="green">//   CEF_TRACE_EVENT_BEGIN0("MY_SUBSYSTEM", "SomethingCostly")</font>
+<font color="green">//   doSomethingCostly()</font>
+<font color="green">//   CEF_TRACE_EVENT_END0("MY_SUBSYSTEM", "SomethingCostly")</font>
+<font color="green">// Note: Our tools can't always determine the correct BEGIN/END pairs unless</font>
+<font color="green">// these are used in the same scope. Use ASYNC_BEGIN/ASYNC_END macros if you</font>
+<font color="green">// need them to be in separate scopes.</font>
+<font color="green">//</font>
+<font color="green">// A common use case is to trace entire function scopes. This issues a trace</font>
+<font color="green">// BEGIN and END automatically:</font>
+<font color="green">//   void doSomethingCostly() {</font>
+<font color="green">//     CEF_TRACE_EVENT0("MY_SUBSYSTEM", "doSomethingCostly");</font>
+<font color="green">//     ...</font>
+<font color="green">//   }</font>
+<font color="green">//</font>
+<font color="green">// Additional parameters can be associated with an event:</font>
+<font color="green">//   void doSomethingCostly2(int howMuch) {</font>
+<font color="green">//     CEF_TRACE_EVENT1("MY_SUBSYSTEM", "doSomethingCostly",</font>
+<font color="green">//         "howMuch", howMuch);</font>
+<font color="green">//     ...</font>
+<font color="green">//   }</font>
+<font color="green">//</font>
+<font color="green">// The trace system will automatically add to this information the current</font>
+<font color="green">// process id, thread id, and a timestamp in microseconds.</font>
+<font color="green">//</font>
+<font color="green">// To trace an asynchronous procedure such as an IPC send/receive, use</font>
+<font color="green">// ASYNC_BEGIN and ASYNC_END:</font>
+<font color="green">//   [single threaded sender code]</font>
+<font color="green">//     static int send_count = 0;</font>
+<font color="green">//     ++send_count;</font>
+<font color="green">//     CEF_TRACE_EVENT_ASYNC_BEGIN0("ipc", "message", send_count);</font>
+<font color="green">//     Send(new MyMessage(send_count));</font>
+<font color="green">//   [receive code]</font>
+<font color="green">//     void OnMyMessage(send_count) {</font>
+<font color="green">//       CEF_TRACE_EVENT_ASYNC_END0("ipc", "message", send_count);</font>
+<font color="green">//     }</font>
+<font color="green">// The third parameter is a unique ID to match ASYNC_BEGIN/ASYNC_END pairs.</font>
+<font color="green">// ASYNC_BEGIN and ASYNC_END can occur on any thread of any traced process.</font>
+<font color="green">// Pointers can be used for the ID parameter, and they will be mangled</font>
+<font color="green">// internally so that the same pointer on two different processes will not</font>
+<font color="green">// match. For example:</font>
+<font color="green">//   class MyTracedClass {</font>
+<font color="green">//    public:</font>
+<font color="green">//     MyTracedClass() {</font>
+<font color="green">//       CEF_TRACE_EVENT_ASYNC_BEGIN0("category", "MyTracedClass", this);</font>
+<font color="green">//     }</font>
+<font color="green">//     ~MyTracedClass() {</font>
+<font color="green">//       CEF_TRACE_EVENT_ASYNC_END0("category", "MyTracedClass", this);</font>
+<font color="green">//     }</font>
+<font color="green">//   }</font>
+<font color="green">//</font>
+<font color="green">// The trace event also supports counters, which is a way to track a quantity</font>
+<font color="green">// as it varies over time. Counters are created with the following macro:</font>
+<font color="green">//   CEF_TRACE_COUNTER1("MY_SUBSYSTEM", "myCounter", g_myCounterValue);</font>
+<font color="green">//</font>
+<font color="green">// Counters are process-specific. The macro itself can be issued from any</font>
+<font color="green">// thread, however.</font>
+<font color="green">//</font>
+<font color="green">// Sometimes, you want to track two counters at once. You can do this with two</font>
+<font color="green">// counter macros:</font>
+<font color="green">//   CEF_TRACE_COUNTER1("MY_SUBSYSTEM", "myCounter0", g_myCounterValue[0]);</font>
+<font color="green">//   CEF_TRACE_COUNTER1("MY_SUBSYSTEM", "myCounter1", g_myCounterValue[1]);</font>
+<font color="green">// Or you can do it with a combined macro:</font>
+<font color="green">//   CEF_TRACE_COUNTER2("MY_SUBSYSTEM", "myCounter",</font>
+<font color="green">//       "bytesPinned", g_myCounterValue[0],</font>
+<font color="green">//       "bytesAllocated", g_myCounterValue[1]);</font>
+<font color="green">// This indicates to the tracing UI that these counters should be displayed</font>
+<font color="green">// in a single graph, as a summed area chart.</font>
+<font color="green">//</font>
+<font color="green">// Since counters are in a global namespace, you may want to disembiguate with a</font>
+<font color="green">// unique ID, by using the CEF_TRACE_COUNTER_ID* variations.</font>
+<font color="green">//</font>
+<font color="green">// By default, trace collection is compiled in, but turned off at runtime.</font>
+<font color="green">// Collecting trace data is the responsibility of the embedding application. In</font>
+<font color="green">// CEF's case, calling BeginTracing will turn on tracing on all active</font>
+<font color="green">// processes.</font>
+<font color="green">//</font>
+<font color="green">//</font>
+<font color="green">// Memory scoping note:</font>
+<font color="green">// Tracing copies the pointers, not the string content, of the strings passed</font>
+<font color="green">// in for category, name, and arg_names.  Thus, the following code will cause</font>
+<font color="green">// problems:</font>
+<font color="green">//     char* str = strdup("impprtantName");</font>
+<font color="green">//     CEF_TRACE_EVENT_INSTANT0("SUBSYSTEM", str);  // BAD!</font>
+<font color="green">//     free(str);                   // Trace system now has dangling pointer</font>
+<font color="green">//</font>
+<font color="green">// To avoid this issue with the |name| and |arg_name| parameters, use the</font>
+<font color="green">// CEF_TRACE_EVENT_COPY_XXX overloads of the macros at additional runtime</font>
+<font color="green">// overhead.</font>
+<font color="green">// Notes: The category must always be in a long-lived char* (i.e. static const).</font>
+<font color="green">//        The |arg_values|, when used, are always deep copied with the _COPY</font>
+<font color="green">//        macros.</font>
+<font color="green">//</font>
+<font color="green">//</font>
+<font color="green">// Thread Safety:</font>
+<font color="green">// All macros are thread safe and can be used from any process.</font>
+<font color="green">///</font>
+
+<font color="blue">#ifndef</font> CEF_INCLUDE_CEF_TRACE_EVENT_H_
+<font color="blue">#define</font> CEF_INCLUDE_CEF_TRACE_EVENT_H_
+<font color="blue">#pragma</font> once
+
+<font color="blue">#include</font> <font color="maroon">"include/internal/cef_export.h"</font>
+<font color="blue">#include</font> <font color="maroon">"include/internal/cef_types.h"</font>
+
+<font color="blue">#ifdef</font> __cplusplus
+<font color="blue">extern</font> <font color="maroon">"C"</font> <font color="black">{</font>
+<font color="blue">#endif</font>
+
+<font color="green">// Functions for tracing counters and functions; called from macros.</font>
+<font color="green">// - |category| string must have application lifetime (static or literal). They</font>
+<font color="green">//   may not include "(quotes) chars.</font>
+<font color="green">// - |argX_name|, |argX_val|, |valueX_name|, |valeX_val| are optional parameters</font>
+<font color="green">//   and represent pairs of name and values of arguments</font>
+<font color="green">// - |copy| is used to avoid memory scoping issues with the |name| and</font>
+<font color="green">//   |arg_name| parameters by copying them</font>
+<font color="green">// - |id| is used to disambiguate counters with the same name, or match async</font>
+<font color="green">//   trace events</font>
+
+CEF_EXPORT <font color="blue">void</font> cef_trace_event<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                uint64 arg1_val,
+                                <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg2_name,
+                                uint64 arg2_val<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_event_instant<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                        <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                        <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                        uint64 arg1_val,
+                                        <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg2_name,
+                                        uint64 arg2_val,
+                                        <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_event_begin<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                      <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                      <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                      uint64 arg1_val,
+                                      <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg2_name,
+                                      uint64 arg2_val,
+                                      <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_event_end<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                    <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                    <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                    uint64 arg1_val,
+                                    <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg2_name,
+                                    uint64 arg2_val,
+                                    <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_counter<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                  <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                  <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> value1_name,
+                                  uint64 value1_val,
+                                  <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> value2_name,
+                                  uint64 value2_val,
+                                  <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_counter_id<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                     <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                     uint64 id,
+                                     <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> value1_name,
+                                     uint64 value1_val,
+                                     <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> value2_name,
+                                     uint64 value2_val,
+                                     <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_event_async_begin<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                            <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                            uint64 id,
+                                            <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                            uint64 arg1_val,
+                                            <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg2_name,
+                                            uint64 arg2_val,
+                                            <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_event_async_step<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                           <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                           uint64 id,
+                                           uint64 step,
+                                           <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                           uint64 arg1_val,
+                                           <font color="blue">int</font> copy<font color="black">)</font>;
+CEF_EXPORT <font color="blue">void</font> cef_trace_event_async_end<font color="black">(</font><font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> category,
+                                          <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> <font color="blue">name</font>,
+                                          uint64 id,
+                                          <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg1_name,
+                                          uint64 arg1_val,
+                                          <font color="blue">const</font> <font color="blue">char</font><font color="black">*</font> arg2_name,
+                                          uint64 arg2_val,
+                                          <font color="blue">int</font> copy<font color="black">)</font>;
+
+<font color="blue">#ifdef</font> __cplusplus
+<font color="black">}</font>
+<font color="blue">#endif</font>
+
+<font color="green">// Records a pair of begin and end events called "name" for the current</font>
+<font color="green">// scope, with 0, 1 or 2 associated arguments. If the category is not</font>
+<font color="green">// enabled, then this does nothing.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val<font color="black">)</font> \
+  cef_trace_event<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, arg2_val<font color="black">)</font>
+
+<font color="green">// Records a single event called "name" immediately, with 0, 1 or 2</font>
+<font color="green">// associated arguments. If the category is not enabled, then this</font>
+<font color="green">// does nothing.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_INSTANT0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event_instant<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_INSTANT1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_instant<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_INSTANT2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_instant<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_INSTANT0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event_instant<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_INSTANT1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_instant<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_INSTANT2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_instant<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records a single BEGIN event called "name" immediately, with 0, 1 or 2</font>
+<font color="green">// associated arguments. If the category is not enabled, then this</font>
+<font color="green">// does nothing.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_BEGIN0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event_begin<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_BEGIN1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_begin<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_BEGIN2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_begin<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_BEGIN0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event_begin<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_BEGIN1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_begin<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_BEGIN2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_begin<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records a single END event for "name" immediately. If the category</font>
+<font color="green">// is not enabled, then this does nothing.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_END0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event_end<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_END1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_end<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_END2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_end<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_END0<font color="black">(</font>category, <font color="blue">name</font><font color="black">)</font> \
+  cef_trace_event_end<font color="black">(</font>category, <font color="blue">name</font>, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_END1<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_end<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_END2<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_end<font color="black">(</font>category, <font color="blue">name</font>, arg1_name, arg1_val, arg2_name, \
+      arg2_val, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records the value of a counter called "name" immediately. Value</font>
+<font color="green">// must be representable as a 32 bit integer.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="blue">#define</font> CEF_TRACE_COUNTER1<font color="black">(</font>category, <font color="blue">name</font>, value<font color="black">)</font> \
+  cef_trace_counter<font color="black">(</font>category, <font color="blue">name</font>, NULL, value, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_COPY_COUNTER1<font color="black">(</font>category, <font color="blue">name</font>, value<font color="black">)</font> \
+  cef_trace_counter<font color="black">(</font>category, <font color="blue">name</font>, NULL, value, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records the values of a multi-parted counter called "name" immediately.</font>
+<font color="green">// The UI will treat value1 and value2 as parts of a whole, displaying their</font>
+<font color="green">// values as a stacked-bar chart.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="blue">#define</font> CEF_TRACE_COUNTER2<font color="black">(</font>category, <font color="blue">name</font>, value1_name, value1_val, \
+      value2_name, value2_val<font color="black">)</font> \
+  cef_trace_counter<font color="black">(</font>category, <font color="blue">name</font>, value1_name, value1_val, value2_name, \
+      value2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_COPY_COUNTER2<font color="black">(</font>category, <font color="blue">name</font>, value1_name, value1_val, \
+      value2_name, value2_val<font color="black">)</font> \
+  cef_trace_counter<font color="black">(</font>category, <font color="blue">name</font>, value1_name, value1_val, value2_name, \
+      value2_val, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records the value of a counter called "name" immediately. Value</font>
+<font color="green">// must be representable as a 32 bit integer.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="green">// - |id| is used to disambiguate counters with the same name. It must either</font>
+<font color="green">//   be a pointer or an integer value up to 64 bits. If it's a pointer, the</font>
+<font color="green">//   bits will be xored with a hash of the process ID so that the same pointer</font>
+<font color="green">//   on two different processes will not collide.</font>
+<font color="blue">#define</font> CEF_TRACE_COUNTER_ID1<font color="black">(</font>category, <font color="blue">name</font>, id, value<font color="black">)</font> \
+  cef_trace_counter_id<font color="black">(</font>category, <font color="blue">name</font>, id, NULL, value, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_COPY_COUNTER_ID1<font color="black">(</font>category, <font color="blue">name</font>, id, value<font color="black">)</font> \
+  cef_trace_counter_id<font color="black">(</font>category, <font color="blue">name</font>, id, NULL, value, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records the values of a multi-parted counter called "name" immediately.</font>
+<font color="green">// The UI will treat value1 and value2 as parts of a whole, displaying their</font>
+<font color="green">// values as a stacked-bar chart.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="green">// - |id| is used to disambiguate counters with the same name. It must either</font>
+<font color="green">//   be a pointer or an integer value up to 64 bits. If it's a pointer, the</font>
+<font color="green">//   bits will be xored with a hash of the process ID so that the same pointer</font>
+<font color="green">//   on two different processes will not collide.</font>
+<font color="blue">#define</font> CEF_TRACE_COUNTER_ID2<font color="black">(</font>category, <font color="blue">name</font>, id, value1_name, value1_val, \
+      value2_name, value2_val<font color="black">)</font> \
+  cef_trace_counter_id<font color="black">(</font>category, <font color="blue">name</font>, id, value1_name, value1_val, \
+      value2_name, value2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_COPY_COUNTER_ID2<font color="black">(</font>category, <font color="blue">name</font>, id, value1_name, \
+      value1_val, value2_name, value2_val<font color="black">)</font> \
+  cef_trace_counter_id<font color="black">(</font>category, <font color="blue">name</font>, id, value1_name, value1_val, \
+      value2_name, value2_val, <font color="blue">true</font><font color="black">)</font>
+
+
+<font color="green">// Records a single ASYNC_BEGIN event called "name" immediately, with 0, 1 or 2</font>
+<font color="green">// associated arguments. If the category is not enabled, then this</font>
+<font color="green">// does nothing.</font>
+<font color="green">// - category and name strings must have application lifetime (statics or</font>
+<font color="green">//   literals). They may not include " chars.</font>
+<font color="green">// - |id| is used to match the ASYNC_BEGIN event with the ASYNC_END event.</font>
+<font color="green">//   ASYNC events are considered to match if their category, name and id values</font>
+<font color="green">//   all match. |id| must either be a pointer or an integer value up to 64</font>
+<font color="green">//   bits. If it's a pointer, the bits will be xored with a hash of the process</font>
+<font color="green">//   ID sothat the same pointer on two different processes will not collide.</font>
+<font color="green">// An asynchronous operation can consist of multiple phases. The first phase is</font>
+<font color="green">// defined by the ASYNC_BEGIN calls. Additional phases can be defined using the</font>
+<font color="green">// ASYNC_STEP_BEGIN macros. When the operation completes, call ASYNC_END.</font>
+<font color="green">// An async operation can span threads and processes, but all events in that</font>
+<font color="green">// operation must use the same |name| and |id|. Each event can have its own</font>
+<font color="green">// args.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_BEGIN0<font color="black">(</font>category, <font color="blue">name</font>, id<font color="black">)</font> \
+  cef_trace_event_async_begin<font color="black">(</font>category, <font color="blue">name</font>, id, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_BEGIN1<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_async_begin<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, NULL, \
+      <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_BEGIN2<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_async_begin<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, \
+      arg2_name, arg2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_BEGIN0<font color="black">(</font>category, <font color="blue">name</font>, id<font color="black">)</font> \
+  cef_trace_event_async_begin<font color="black">(</font>category, <font color="blue">name</font>, id, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_BEGIN1<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, \
+      arg1_val<font color="black">)</font> \
+  cef_trace_event_async_begin<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, NULL, \
+      <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_BEGIN2<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, \
+      arg1_val, arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_async_begin<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, \
+      arg2_name, arg2_val, <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records a single ASYNC_STEP event for |step| immediately. If the category</font>
+<font color="green">// is not enabled, then this does nothing. The |name| and |id| must match the</font>
+<font color="green">// ASYNC_BEGIN event above. The |step| param identifies this step within the</font>
+<font color="green">// async event. This should be called at the beginning of the next phase of an</font>
+<font color="green">// asynchronous operation.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_STEP0<font color="black">(</font>category, <font color="blue">name</font>, id, step<font color="black">)</font> \
+  cef_trace_event_async_step<font color="black">(</font>category, <font color="blue">name</font>, id, step, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_STEP1<font color="black">(</font>category, <font color="blue">name</font>, id, step, \
+      arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_async_step<font color="black">(</font>category, <font color="blue">name</font>, id, step, arg1_name, arg1_val, \
+      <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_STEP0<font color="black">(</font>category, <font color="blue">name</font>, id, step<font color="black">)</font> \
+  cef_trace_event_async_step<font color="black">(</font>category, <font color="blue">name</font>, id, step, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_STEP1<font color="black">(</font>category, <font color="blue">name</font>, id, step, \
+      arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_async_step<font color="black">(</font>category, <font color="blue">name</font>, id, step, arg1_name, arg1_val, \
+      <font color="blue">true</font><font color="black">)</font>
+
+<font color="green">// Records a single ASYNC_END event for "name" immediately. If the category</font>
+<font color="green">// is not enabled, then this does nothing.</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_END0<font color="black">(</font>category, <font color="blue">name</font>, id<font color="black">)</font> \
+  cef_trace_event_async_end<font color="black">(</font>category, <font color="blue">name</font>, id, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_END1<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val<font color="black">)</font> \
+  cef_trace_event_async_end<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, \
+      <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_ASYNC_END2<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, \
+      arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_async_end<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, \
+      arg2_name, arg2_val, <font color="blue">false</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_END0<font color="black">(</font>category, <font color="blue">name</font>, id<font color="black">)</font> \
+  cef_trace_event_async_end<font color="black">(</font>category, <font color="blue">name</font>, id, NULL, <font color="maroon">0</font>, NULL, <font color="maroon">0</font>, <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_END1<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, \
+      arg1_val<font color="black">)</font> \
+  cef_trace_event_async_end<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, NULL, <font color="maroon">0</font>, \
+      <font color="blue">true</font><font color="black">)</font>
+<font color="blue">#define</font> CEF_TRACE_EVENT_COPY_ASYNC_END2<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, \
+      arg1_val, arg2_name, arg2_val<font color="black">)</font> \
+  cef_trace_event_async_end<font color="black">(</font>category, <font color="blue">name</font>, id, arg1_name, arg1_val, \
+      arg2_name, arg2_val, <font color="blue">true</font><font color="black">)</font>
+
+<font color="blue">#endif</font>  <font color="green">// CEF_INCLUDE_CEF_TRACE_EVENT_H_</font>
+
+</PRE>
+</BODY>
+</HTML>
