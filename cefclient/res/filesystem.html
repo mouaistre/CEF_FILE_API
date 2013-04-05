@@ -1,12 +1,20 @@
 <html>
 <head>
 <title>File System Test</title>
+
 <script language="JavaScript">
+
+  function browseForOpenCB(ret,id){
+  document.getElementById('out').innerHTML ='browseForOpenCB called successfully '+ret+' '+id;
+  }
 
 </script>
 
 </head>
+
 <body>
-TODO
+	<button onclick="fs.browseForOpen(browseForOpenCB,'title')">Open File Browser</button>
+  <span id="out">Hello</span>
 </body>
+
 </html>

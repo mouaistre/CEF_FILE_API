@@ -85,6 +85,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
   AppInitCommandLine(0, NULL);
 
   CefSettings settings;
+  settings.single_process=true;//for testing
 
   // Populate the settings based on command line arguments.
   AppGetSettings(settings);
@@ -409,10 +410,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (browser.get())
           scheme_test::RunTest(browser);
         return 0;
+		/*
       case ID_TESTS_BINDING:  // Test JavaScript binding
         if (browser.get())
           binding_test::RunTest(browser);
-        return 0;
+        return 0;*/
 	  case ID_TESTS_FILE_SYSTEM://Test file system interaction
 		if (browser.get())
           filesystem_test::RunTest(browser);

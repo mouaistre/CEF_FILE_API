@@ -101,11 +101,10 @@ void SetList(CefRefPtr<CefListValue> source, CefRefPtr<CefV8Value> target) {
 }
 
 
-// Handles the native implementation for the client_app extension.
-class ClientAppExtensionHandler : public CefV8Handler {
+class FileSystemExtensionHandler : public CefV8Handler {
  public:
-  explicit ClientAppExtensionHandler(CefRefPtr<ClientApp> client_app)
-    : client_app_(client_app) {
+  explicit FileSystemExtensionHandler(CefRefPtr<ClientApp> client_app)
+    : client_app_(client_app),messageId(0) {
   }
 
   virtual bool Execute(const CefString& name,
@@ -115,64 +114,105 @@ class ClientAppExtensionHandler : public CefV8Handler {
                        CefString& exception) {
     bool handled = false;
 
-    if (name == "sendMessage") {
-      // Send a message to the browser process.
-      if ((arguments.size() == 1 || arguments.size() == 2) &&
-          arguments[0]->IsString()) {
-        CefRefPtr<CefBrowser> browser =
-            CefV8Context::GetCurrentContext()->GetBrowser();
-        ASSERT(browser.get());
-
-        CefString name = arguments[0]->GetStringValue();
-        if (!name.empty()) {
-          CefRefPtr<CefProcessMessage> message =
-              CefProcessMessage::Create(name);
-
-          // Translate the arguments, if any.
-          if (arguments.size() == 2 && arguments[1]->IsArray())
-            SetList(arguments[1], message->GetArgumentList());
-
-          browser->SendProcessMessage(PID_BROWSER, message);
-          handled = true;
-        }
+	 // Pass all messages to the browser process. Look in appshell_extensions.cpp for implementation.
+     CefRefPtr<CefBrowser> browser = CefV8Context::GetCurrentContext()->GetBrowser();
+     ASSERT(browser.get());
+     CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(name);
+     CefRefPtr<CefListValue> messageArgs = message->GetArgumentList();
+          
+     // The first argument must be a callback function
+     if (arguments.size() > 0 && !arguments[0]->IsFunction()) {
+          std::string functionName = name;
+          fprintf(stderr, "Function called without callback param: %s\n", functionName.c_str());
+          return false;
+     } 
+          
+     if (arguments.size() > 0) {
+         // The first argument is the message id
+         client_app_->AddCallback(messageId, CefV8Context::GetCurrentContext(), arguments[0]);
+		 SetListValue(messageArgs, 0, CefV8Value::CreateInt(messageId));
       }
-    } else if (name == "setMessageCallback") {
-      // Set a message callback.
-      if (arguments.size() == 2 && arguments[0]->IsString() &&
-          arguments[1]->IsFunction()) {
-        std::string name = arguments[0]->GetStringValue();
-        CefRefPtr<CefV8Context> context = CefV8Context::GetCurrentContext();
-        int browser_id = context->GetBrowser()->GetIdentifier();
-        client_app_->SetMessageCallback(name, browser_id, context,
-                                        arguments[1]);
-        handled = true;
-      }
-    }  else if (name == "removeMessageCallback") {
-      // Remove a message callback.
-      if (arguments.size() == 1 && arguments[0]->IsString()) {
-        std::string name = arguments[0]->GetStringValue();
-        CefRefPtr<CefV8Context> context = CefV8Context::GetCurrentContext();
-        int browser_id = context->GetBrowser()->GetIdentifier();
-        bool removed = client_app_->RemoveMessageCallback(name, browser_id);
-        retval = CefV8Value::CreateBool(removed);
-        handled = true;
-      }
-    }
-
-    if (!handled)
-      exception = "Invalid method arguments";
-
+          
+      // Pass the rest of the arguments
+      for (unsigned int i = 1; i < arguments.size(); i++)
+              SetListValue(messageArgs, i, arguments[i]);
+      browser->SendProcessMessage(PID_BROWSER, message);
+          
+      messageId++;
+	
     return true;
   }
 
  private:
   CefRefPtr<ClientApp> client_app_;
-
-  IMPLEMENT_REFCOUNTING(ClientAppExtensionHandler);
+  int32 messageId;
+  IMPLEMENT_REFCOUNTING(FileSystemExtensionHandler);
 };
+/*
+// Handles the native implementation for the File System extension.
+class FileSystemExtensionHandler : public CefV8Handler {
+ public:
+  explicit FileSystemExtensionHandler(CefRefPtr<ClientApp> client_app)
+    : client_app_(client_app)
+    , messageId(0) {
 
+  }
+
+  virtual bool Execute(const CefString& name,
+                       CefRefPtr<CefV8Value> object,
+                       const CefV8ValueList& arguments,
+                       CefRefPtr<CefV8Value>& retval,
+                       CefString& exception) {
+      
+      // The only messages that are handled here is getElapsedMilliseconds(),
+      // GetCurrentLanguage(), GetApplicationSupportDirectory(), and GetRemoteDebuggingPort().
+      // All other messages are passed to the browser process.
+      //if (name == "GetElapsedMilliseconds") {
+        //  retval = CefV8Value::CreateDouble(client_app_->GetElapsedMilliseconds());
+      //} else if (name == "GetCurrentLanguage") {
+      //    retval = CefV8Value::CreateString(client_app_->GetCurrentLanguage());
+      //} else if (name == "GetApplicationSupportDirectory") {
+      //    retval = CefV8Value::CreateString(ClientApp::AppGetSupportDirectory());
+      //} else if (name == "GetRemoteDebuggingPort") {
+      //    retval = CefV8Value::CreateInt(REMOTE_DEBUGGING_PORT);
+      //} else
+
+		fprintf(stdout, "Hello");
+		
+          // Pass all messages to the browser process. Look in appshell_extensions.cpp for implementation.
+          CefRefPtr<CefBrowser> browser = 
+                CefV8Context::GetCurrentContext()->GetBrowser();
+          ASSERT(browser.get());
+          CefRefPtr<CefProcessMessage> message = 
+                CefProcessMessage::Create(name);
+          CefRefPtr<CefListValue> messageArgs = message->GetArgumentList();
+          
+          // The first argument must be a callback function
+          if (arguments.size() > 0 && !arguments[0]->IsFunction()) {
+              std::string functionName = name;
+              fprintf(stderr, "Function called without callback param: %s\n", functionName.c_str());
+              return false;
+          } 
+          
+          if (arguments.size() > 0) {
+              // The first argument is the message id
+			  int browser_id = browser->GetIdentifier();
+
+              client_app_->SetMessageCallback(name,browser_id, CefV8Context::GetCurrentContext(), arguments[0]);
+              SetListValue(messageArgs, 0, CefV8Value::CreateInt(messageId));
+          }
+          
+          // Pass the rest of the arguments
+          for (unsigned int i = 1; i < arguments.size(); i++)
+              SetListValue(messageArgs, i, arguments[i]);
+          browser->SendProcessMessage(PID_BROWSER, message);
+          
+          messageId++;
+	
+	return true;
+  }
+  */
 }  // namespace
-
 
 ClientApp::ClientApp() {
   CreateBrowserDelegates(browser_delegates_);
@@ -181,31 +221,6 @@ ClientApp::ClientApp() {
   // Default schemes that support cookies.
   cookieable_schemes_.push_back("http");
   cookieable_schemes_.push_back("https");
-}
-
-void ClientApp::SetMessageCallback(const std::string& message_name,
-                                 int browser_id,
-                                 CefRefPtr<CefV8Context> context,
-                                 CefRefPtr<CefV8Value> function) {
-  ASSERT(CefCurrentlyOn(TID_RENDERER));
-
-  callback_map_.insert(
-      std::make_pair(std::make_pair(message_name, browser_id),
-                     std::make_pair(context, function)));
-}
-
-bool ClientApp::RemoveMessageCallback(const std::string& message_name,
-                                    int browser_id) {
-  ASSERT(CefCurrentlyOn(TID_RENDERER));
-
-  CallbackMap::iterator it =
-      callback_map_.find(std::make_pair(message_name, browser_id));
-  if (it != callback_map_.end()) {
-    callback_map_.erase(it);
-    return true;
-  }
-
-  return false;
 }
 
 void ClientApp::OnContextInitialized() {
@@ -241,26 +256,21 @@ void ClientApp::OnRenderThreadCreated(CefRefPtr<CefListValue> extra_info) {
 
 void ClientApp::OnWebKitInitialized() {
   // Register the client_app extension.
-  std::string app_code =
-    "var app;"
-    "if (!app)"
-    "  app = {};"
+
+
+  std::string fs_code =
+    "var fs;"
+    "if (!fs)"
+    "  fs = {};"
     "(function() {"
-    "  app.sendMessage = function(name, arguments) {"
-    "    native function sendMessage();"
-    "    return sendMessage(name, arguments);"
-    "  };"
-    "  app.setMessageCallback = function(name, callback) {"
-    "    native function setMessageCallback();"
-    "    return setMessageCallback(name, callback);"
-    "  };"
-    "  app.removeMessageCallback = function(name) {"
-    "    native function removeMessageCallback();"
-    "    return removeMessageCallback(name);"
+    "  fs.browseForOpen = function(callback,title) {"
+    "    native function browseForOpen();"
+    "    return browseForOpen(callback,title);"
     "  };"
     "})();";
-  CefRegisterExtension("v8/app", app_code,
-      new ClientAppExtensionHandler(this));
+  CefRegisterExtension("v8/fs", fs_code,
+	  new FileSystemExtensionHandler(this));
+
 
   RenderDelegateSet::iterator it = render_delegates_.begin();
   for (; it != render_delegates_.end(); ++it)
@@ -372,6 +382,65 @@ void ClientApp::OnFocusedNodeChanged(CefRefPtr<CefBrowser> browser,
     (*it)->OnFocusedNodeChanged(this, browser, frame, node);
 }
 
+
+CefRefPtr<CefV8Value> ListValueToV8Value(CefRefPtr<CefListValue> value, int index)
+{
+    CefRefPtr<CefV8Value> new_value;
+    
+    CefValueType type = value->GetType(index);
+    switch (type) {
+        case VTYPE_LIST: {
+            CefRefPtr<CefListValue> list = value->GetList(index);
+            new_value = CefV8Value::CreateArray(list->GetSize());
+            SetList(list, new_value);
+        } break;
+        case VTYPE_BOOL:
+            new_value = CefV8Value::CreateBool(value->GetBool(index));
+            break;
+        case VTYPE_DOUBLE:
+            new_value = CefV8Value::CreateDouble(value->GetDouble(index));
+            break;
+        case VTYPE_INT:
+            new_value = CefV8Value::CreateInt(value->GetInt(index));
+            break;
+        case VTYPE_STRING:
+            new_value = CefV8Value::CreateString(value->GetString(index));
+            break;
+        default:
+            new_value = CefV8Value::CreateNull();
+            break;
+    }
+    
+    return new_value;
+}
+
+
+//Simple stack class to ensure calls to Enter and Exit are balanced
+class StContextScope {
+public:
+    StContextScope( const CefRefPtr<CefV8Context>& ctx )
+    : m_ctx(NULL) {
+        if( ctx && ctx->Enter() ) {
+            m_ctx = ctx;
+        }
+    }
+    
+    ~StContextScope() {
+        if(m_ctx) {
+            m_ctx->Exit();
+        }
+    }
+    
+    const CefRefPtr<CefV8Context>& GetContext() const { 
+        return m_ctx;
+    }
+    
+private:
+    CefRefPtr<CefV8Context> m_ctx;
+    
+};
+
+
 bool ClientApp::OnProcessMessageReceived(
     CefRefPtr<CefBrowser> browser,
     CefProcessId source_process,
@@ -386,46 +455,84 @@ bool ClientApp::OnProcessMessageReceived(
                                               message);
   }
 
-  if (handled)
-    return true;
-
-  // Execute the registered JavaScript callback if any.
-  if (!callback_map_.empty()) {
-    CefString message_name = message->GetName();
-    CallbackMap::const_iterator it = callback_map_.find(
-        std::make_pair(message_name.ToString(),
-                       browser->GetIdentifier()));
-    if (it != callback_map_.end()) {
-      // Keep a local reference to the objects. The callback may remove itself
-      // from the callback map.
-      CefRefPtr<CefV8Context> context = it->second.first;
-      CefRefPtr<CefV8Value> callback = it->second.second;
-
-      // Enter the context.
-      context->Enter();
-
-      CefV8ValueList arguments;
-
-      // First argument is the message name.
-      arguments.push_back(CefV8Value::CreateString(message_name));
-
-      // Second argument is the list of message arguments.
-      CefRefPtr<CefListValue> list = message->GetArgumentList();
-      CefRefPtr<CefV8Value> args = CefV8Value::CreateArray(list->GetSize());
-      SetList(list, args);
-      arguments.push_back(args);
-
-      // Execute the callback.
-      CefRefPtr<CefV8Value> retval = callback->ExecuteFunction(NULL, arguments);
-      if (retval.get()) {
-        if (retval->IsBool())
-          handled = retval->GetBoolValue();
-      }
-
-      // Exit the context.
-      context->Exit();
+  if (!handled) {
+        if (message->GetName() == "invokeCallback") {
+            // This is called by the appshell extension handler to invoke the asynchronous 
+            // callback function
+            
+            CefRefPtr<CefListValue> messageArgs = message->GetArgumentList();
+            int32 callbackId = messageArgs->GetInt(0);
+                    
+            CefRefPtr<CefV8Context> context = callback_map_[callbackId].first;
+            CefRefPtr<CefV8Value> callbackFunction = callback_map_[callbackId].second;
+            CefV8ValueList arguments;
+            context->Enter();
+               
+            for (size_t i = 1; i < messageArgs->GetSize(); i++) {
+                arguments.push_back(ListValueToV8Value(messageArgs, i));
+            }
+            
+            callbackFunction->ExecuteFunction(NULL, arguments);
+            context->Exit();
+            
+            callback_map_.erase(callbackId);
+			handled=true;
+        } 
+		/*else if (message->GetName() == "executeCommand") {
+            // This is called by the browser process to execute a command via JavaScript
+            // 
+            // The first argument is the command name. This is required.
+            // The second argument is a message id. This is optional. If set, a response
+            // message will be sent back to the browser process.
+            
+            CefRefPtr<CefListValue> messageArgs = message->GetArgumentList();
+            CefString commandName = messageArgs->GetString(0);
+            int messageId = messageArgs->GetSize() > 1 ? messageArgs->GetInt(1) : -1;
+            bool handled = false;
+            
+            StContextScope ctx(browser->GetMainFrame()->GetV8Context());
+            
+            CefRefPtr<CefV8Value> global = ctx.GetContext()->GetGlobal();
+            
+            if (global->HasValue("brackets")) { 
+                
+                CefRefPtr<CefV8Value> brackets = global->GetValue("brackets");
+                
+                if (brackets->HasValue("shellAPI")) {
+                    
+                    CefRefPtr<CefV8Value> shellAPI = brackets->GetValue("shellAPI");
+                    
+                    if (shellAPI->HasValue("executeCommand")) {
+                        
+                        CefRefPtr<CefV8Value> executeCommand = shellAPI->GetValue("executeCommand");
+                        
+                        if (executeCommand->IsFunction()) {
+                            
+                            CefRefPtr<CefV8Value> retval;
+                            CefV8ValueList args;
+                            args.push_back(CefV8Value::CreateString(commandName));
+                            
+                            retval = executeCommand->ExecuteFunction(global, args);
+                            
+                            if (retval) {
+                                handled = retval->GetBoolValue();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Return a message saying whether or not the command was handled
+            if (messageId != -1) {
+                CefRefPtr<CefProcessMessage> result = CefProcessMessage::Create("executeCommandCallback");
+                result->GetArgumentList()->SetInt(0, messageId);
+                result->GetArgumentList()->SetBool(1, handled);
+                
+                browser->SendProcessMessage(PID_BROWSER, result);
+            }
+        }*/
     }
-  }
+    
+	return handled;
 
-  return handled;
 }

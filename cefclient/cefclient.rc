@@ -71,7 +71,7 @@ BEGIN
         MENUITEM "Popup Window",                ID_TESTS_POPUP
         MENUITEM "Request",                     ID_TESTS_REQUEST
         MENUITEM "Scheme Handler",              ID_TESTS_SCHEME_HANDLER
-        MENUITEM "JavaScript Binding",          ID_TESTS_BINDING
+       // MENUITEM "JavaScript Binding",          ID_TESTS_BINDING
 		MENUITEM "File System Binding",		    ID_TESTS_FILE_SYSTEM
         MENUITEM "Performance Tests",           ID_TESTS_PERFORMANCE
         MENUITEM "Dialogs",                     ID_TESTS_DIALOGS

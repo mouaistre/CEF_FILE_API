@@ -117,21 +117,10 @@ class ClientApp : public CefApp,
 
   ClientApp();
 
-  // Set a JavaScript callback for the specified |message_name| and |browser_id|
-  // combination. Will automatically be removed when the associated context is
-  // released. Callbacks can also be set in JavaScript using the
-  // app.setMessageCallback function.
-  void SetMessageCallback(const std::string& message_name,
-                          int browser_id,
-                          CefRefPtr<CefV8Context> context,
-                          CefRefPtr<CefV8Value> function);
+  void AddCallback(int32 id, CefRefPtr<CefV8Context> context, CefRefPtr<CefV8Value> callbackFunction) {
+      callback_map_[id] = std::make_pair(context, callbackFunction);
+  }
 
-  // Removes the JavaScript callback for the specified |message_name| and
-  // |browser_id| combination. Returns true if a callback was removed. Callbacks
-  // can also be removed in JavaScript using the app.removeMessageCallback
-  // function.
-  bool RemoveMessageCallback(const std::string& message_name,
-                             int browser_id);
 
  private:
   // Creates all of the BrowserDelegate objects. Implemented in
@@ -210,9 +199,7 @@ class ClientApp : public CefApp,
       CefRefPtr<CefProcessMessage> message) OVERRIDE;
 
   // Map of message callbacks.
-  typedef std::map<std::pair<std::string, int>,
-                   std::pair<CefRefPtr<CefV8Context>, CefRefPtr<CefV8Value> > >
-                   CallbackMap;
+  typedef std::map<int32, std::pair< CefRefPtr<CefV8Context>, CefRefPtr<CefV8Value> > > CallbackMap;
   CallbackMap callback_map_;
 
   // Set of supported BrowserDelegates.
