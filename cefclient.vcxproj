@@ -281,6 +281,7 @@
     <None Include="cefclient\res\dialogs.html" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cefclient\appshell_extensions_platform.h" />
     <ClInclude Include="cefclient\filesystem_test.h" />
     <ClInclude Include="include\cef_trace.h" />
     <ClInclude Include="include\cef_download_handler.h" />
@@ -371,6 +372,7 @@
     <ClInclude Include="cefclient\performance_test_setup.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cefclient\appshell_extensions_win.cpp" />
     <ClCompile Include="cefclient\filesystem_test.cpp" />
     <ClCompile Include="cefclient\performance_test_tests.cpp" />
     <ClCompile Include="cefclient\cefclient_win.cpp" />

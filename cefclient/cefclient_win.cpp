@@ -31,6 +31,7 @@
 #define URLBAR_HEIGHT  24
 
 // Global Variables:
+std::wstring gFilesToOpen; // Filenames passed as arguments to app
 HINSTANCE hInst;   // current instance
 TCHAR szTitle[MAX_LOADSTRING];  // The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];  // the main window class name

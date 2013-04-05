@@ -10,6 +10,8 @@
 #include "include/wrapper/cef_stream_resource_handler.h"
 #include "cefclient/resource_util.h"
 
+#include "appshell_extensions_platform.h"
+
 namespace filesystem_test {
 
 namespace {
@@ -56,6 +58,9 @@ class ProcessMessageDelegate : public ClientHandler::ProcessMessageDelegate {
         }
 
 		if (message_name == "browseForOpen") {
+
+			CefRefPtr<CefListValue> selectedFiles=CefListValue::Create();
+			ShowOpenDialog(false,false,L"title",L"",L"",selectedFiles);
             // Parameters:
             //  0: int32 - callback id
             //  1: string - argURL

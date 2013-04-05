@@ -378,9 +378,15 @@
     <ClCompile Include="cefclient\filesystem_test.cpp">
       <Filter>cefclient</Filter>
     </ClCompile>
+    <ClCompile Include="cefclient\appshell_extensions_win.cpp">
+      <Filter>cefclient</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cefclient\filesystem_test.h">
+      <Filter>cefclient</Filter>
+    </ClInclude>
+    <ClInclude Include="cefclient\appshell_extensions_platform.h">
       <Filter>cefclient</Filter>
     </ClInclude>
   </ItemGroup>

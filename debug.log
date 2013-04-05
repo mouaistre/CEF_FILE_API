@@ -603,3 +603,22 @@ Backtrace:
 [0405/172959:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
 [0405/172959:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
 [0405/173000:ERROR:ipc_channel_win.cc(132)] pipe error: 109
+[0405/173249:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/173304:ERROR:ipc_channel_win.cc(132)] pipe error: 109
+[0405/184040:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/184255:ERROR:ipc_channel_win.cc(132)] pipe error: 109
+[0405/184311:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/184314:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184314:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184314:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184314:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184314:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184314:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184456:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
+[0405/184542:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184542:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184543:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184543:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184546:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184546:WARNING:content_browser_client.cc(357)] No browser info matching process id 2 and view id 1
+[0405/184633:ERROR:proxy_service_factory.cc(88)] Cannot use V8 Proxy resolver in single process mode.
